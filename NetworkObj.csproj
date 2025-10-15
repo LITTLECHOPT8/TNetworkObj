@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>NetworkObj</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="TCP\Listener.cs" />
+    <Content Include="TCP\Redirect.cs" />
+    <Content Include="TCP\Clients.cs" />
+    <Content Include="Utils\Write.cs" />
+    <Content Include="Utils\Read.cs" />
+    <Content Include="Utils\Log.cs" />
+    <Content Include="Packets\Handle.cs" />
+    <Content Include="Classes\Stored.cs" />
+  </ItemGroup>
+</Project>
