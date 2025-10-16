@@ -24,5 +24,6 @@
     <Content Include="TCP\Respond.cs" />
     <Content Include="Packets\Server\GHeartbeat.cs" />
     <Content Include="Program.cs" />
+    <Content Include=".git\COMMIT_EDITMSG" />
   </ItemGroup>
 </Project>
