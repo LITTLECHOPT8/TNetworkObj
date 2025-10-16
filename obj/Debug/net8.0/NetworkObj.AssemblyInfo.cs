@@ -14,7 +14,11 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NetworkObj")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
+<<<<<<< Updated upstream
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7f646db9834c4dfd74429b910b339e419134a956")]
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c5ed08b6da0814d7fb1e347c60210a4dee167f1c")]
+>>>>>>> Stashed changes
 [assembly: System.Reflection.AssemblyProductAttribute("NetworkObj")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NetworkObj")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

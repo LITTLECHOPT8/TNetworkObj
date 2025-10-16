@@ -1,7 +1,83 @@
 ﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+# Visual Studio (fixed version)
+# This .gitignore file ignores build artifacts and IDE-specific files for all projects.
 ################################################################################
 
-/.vs/NetworkObj
-/bin
-/obj
+# Visual Studio working folder
+.vs/
+.vscode/
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Tt]emp/
+[Tt]estResults/
+[xX]64/
+[xX]86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.cache
+*.pdb
+
+# Auto-generated build files
+*.obj
+*.exe
+*.dll
+*.pdb
+*.mdb
+
+# NuGet packages
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+!**/packages/build/
+!**/packages/repositories.config
+
+# Build output and intermediate folders for all projects
+**/bin/
+**/obj/
+
+# Rider / JetBrains
+.idea/
+
+# Backup and temporary files
+*.bak
+*.tmp
+*.log
+*.scc
+
+# Visual Studio profiler
+*.vsp
+*.vspx
+*.vspscc
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Node.js (if using JS tooling)
+node_modules/
+npm-debug.log*
+
+################################################################################
+# End of file
+################################################################################
