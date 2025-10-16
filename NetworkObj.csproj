@@ -15,7 +15,6 @@
   <ItemGroup>
     <Content Include="TCP\Listener.cs" />
     <Content Include="TCP\Clients.cs" />
-    <Content Include="Utils\Log.cs" />
     <Content Include="Classes\Stored.cs" />
     <Content Include="Utils\Create.cs" />
     <Content Include="Utils\Protocol.cs" />

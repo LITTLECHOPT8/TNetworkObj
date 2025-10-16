@@ -13,14 +13,14 @@ namespace NetworkObj.TCP
 
             if (user == null)
             {
-                new Log("Disconnect client.");
+                Logger.Info("Disconnect client, no info was found");
                 return -1;
             }
 
             int roomId = new Random().Next(1, 9999);
             if (rooms.TryGetValue(roomId, out Room _))
             {
-                new Log("Already existing room tried to get created, recreating...");
+                Logger.Log("Already existing room tried to get created, recreating...");
                 //CreateRoom(client, Password);
                 return -2;
             }
@@ -33,6 +33,9 @@ namespace NetworkObj.TCP
             room.Password = Password;
 
             rooms.Add(roomId, room);
+
+            string logHelp = (Password != String.Empty) ? $"password {Password}" : "no password";
+            Logger.Log($"Room {roomId} was created with {logHelp}");
 
             return roomId;
         }

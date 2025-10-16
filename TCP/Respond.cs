@@ -35,19 +35,19 @@ class Responder
                 if (!await Reader.rexact(stream, buffer, 4, tr)) return;
             }
 
-            if (!new Reader(buffer).parse(buffer)) Console.WriteLine("Packet couldn't be parsed!");
+            if (!new Reader(buffer).parse(buffer)) Logger.Error("Packet parser failed");
 
             rpacket = new Reader(buffer);
             uint packetType = rpacket.ptype();
 
             if (Clients.GetUser(client) == null)
             {
-                Console.WriteLine($"Breaking {client.Client.RemoteEndPoint}'s connection.");
+                Logger.Info($"Breaking {client.Client.RemoteEndPoint}'s connection (No user connected to client)");
                 client.Close();
                 break;
             }
 
-            switch (packetType)
+            switch ((Protocols)packetType)
             {
                 case Protocols.CG_HEARTBEAT:
                     await Heartbeat();
@@ -57,7 +57,9 @@ class Responder
                     break;
                 case Protocols.CG_START_GAME:
                     await DefaultPacket(Protocols.GC_START_GAME);
-                    Console.WriteLine("Test");
+                    break;
+                case Protocols.CG_DESTROY_ROOM:
+                    await DefaultPacket(Protocols.GC_DESTROY_ROOM, true);
                     break;
                 default:
                     break;
@@ -110,16 +112,22 @@ class Responder
         await Clients.SendToClient(client, p.Pack());
     }
 
-    async Task DefaultPacket(uint packetType)
+    async Task DefaultPacket(Protocols packetType, bool result = false)
     {
         Writer packet = new Writer();
 
-        packet.wuint(12u);
-        packet.wuint(packetType);
+        if (result) packet.wuint(16u);
+        if (!result) packet.wuint(12u);
+
+        packet.wuint((uint)packetType);
         packet.wuint(1u);
 
+        if (result) packet.wuint(1u);
+
+        if (Clients.GetUser(client).RoomId == -1) return;
+
         int roomId = Clients.GetUser(client).RoomId;
-        Console.WriteLine(roomId);
+        //Console.WriteLine(roomId);
 
         await Rooms.SendToRoom(roomId, packet);
     }

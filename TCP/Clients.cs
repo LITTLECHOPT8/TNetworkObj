@@ -34,7 +34,7 @@ namespace NetworkObj.TCP
                 var Stream = Client.GetStream();
                 if (Stream == null || !Stream.CanWrite)
                 {
-                    Console.WriteLine("Client disconnected during write, cleaning up.");
+                    Logger.Warning($"Client {Client.Client.RemoteEndPoint} disconnected during write");
                     //DisconnectClient(Client);
                     return;
                 }
@@ -42,7 +42,7 @@ namespace NetworkObj.TCP
                 byte[] Data = Packet.array();
                 if (Data.Length < 12)
                 {
-                    Console.WriteLine("Invalid packet (too small).");
+                    Logger.Error($"Packet too short ({Data.Length}/12 bytes)");
                     return;
                 }
 
@@ -50,7 +50,7 @@ namespace NetworkObj.TCP
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Parsing error: {ex.Message}, disconnecting client.");
+                Logger.Error($"Client exception ({Client.Client.RemoteEndPoint}): {ex.Message}");
                 //DisconnectClient(Client);
             }
         }

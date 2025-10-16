@@ -11,7 +11,7 @@ namespace NetworkObj.TCP
             TcpListener listener = new TcpListener(IP, Port);
             listener.Start();
 
-            Console.WriteLine($"Server started at {IP}:{Port}");
+            Logger.Info($"Server started at {IP}:{Port}");
 
             while (true)
             {
@@ -22,7 +22,7 @@ namespace NetworkObj.TCP
                 {
                     TcpClient client = clientReq.Result;
 
-                    Console.WriteLine($"Client {client.Client.RemoteEndPoint} connected");
+                    Logger.Info($"Client {client.Client.RemoteEndPoint} connected");
 
                     _ = Task.Run(async () =>
                     {
@@ -32,7 +32,7 @@ namespace NetworkObj.TCP
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"Error with client {client.Client.RemoteEndPoint}: {ex.Message}");
+                            Logger.Error($"Error with client {client.Client.RemoteEndPoint}: {ex.Message}");
                         }
                     });
                 }
