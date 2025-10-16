@@ -3,14 +3,13 @@ using NetworkObj.Utils;
 
 namespace NetworkObj.TCP
 {
-    public class Rooms
+    public static class Rooms
     {
-        private readonly Dictionary<int, Room> rooms = new Dictionary<int, Room>();
-        Clients clients = new Clients();
+        private static readonly Dictionary<int, Room> rooms = new Dictionary<int, Room>();
 
-        public int CreateRoom(TcpClient client, string Password)
+        public static int CreateRoom(TcpClient client, string Password)
         {
-            User user = clients.GetUser(client);
+            User user = Clients.GetUser(client);
 
             if (user == null)
             {
@@ -33,7 +32,32 @@ namespace NetworkObj.TCP
             room.Max = 4;
             room.Password = Password;
 
+            rooms.Add(roomId, room);
+
             return roomId;
+        }
+
+        public static async Task SendToRoom(int roomId, Writer packet, TcpClient? except = null)
+        {
+            if (!rooms.TryGetValue(roomId, out Room room)) return;
+
+            byte[] data = packet.array();
+
+            List<Task> sendTasks = new List<Task>();
+
+            foreach (var client in room.Players)
+            {
+                if (client == null || !client.Connected || client == except)
+                    continue;
+
+                var stream = client.GetStream();
+                if (stream != null && stream.CanWrite)
+                {
+                    sendTasks.Add(stream.WriteAsync(data, 0, data.Length));
+                }
+            }
+
+            await Task.WhenAll(sendTasks);
         }
     }
 }

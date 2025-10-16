@@ -8,13 +8,22 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Packets\Client - Copy\**" />
+    <EmbeddedResource Remove="Packets\Client - Copy\**" />
+    <None Remove="Packets\Client - Copy\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="TCP\Listener.cs" />
-    <Content Include="TCP\Redirect.cs" />
     <Content Include="TCP\Clients.cs" />
-    <Content Include="Utils\Write.cs" />
-    <Content Include="Utils\Read.cs" />
     <Content Include="Utils\Log.cs" />
-    <Content Include="Packets\Handle.cs" />
     <Content Include="Classes\Stored.cs" />
+    <Content Include="Utils\Create.cs" />
+    <Content Include="Utils\Protocol.cs" />
+    <Content Include="Utils\Writer.cs" />
+    <Content Include="Utils\Reader.cs" />
+    <Content Include="TCP\Rooms.cs" />
+    <Content Include="TCP\Respond.cs" />
+    <Content Include="Packets\Server\GHeartbeat.cs" />
+    <Content Include="Program.cs" />
   </ItemGroup>
 </Project>

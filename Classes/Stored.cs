@@ -4,18 +4,19 @@ namespace NetworkObj
 {
     public class User
     {
-        public int UserId;
-        public int RoomId;
-        public bool RoomMaster;
-        public int Avatar;
-        public int Level;
+        public int UserId = -1;
+        public int RoomId = -1;
+        public bool RoomMaster = false;
+        public int Avatar = 1;
+        public int Level = 1;
+        public string Name = "Player";
         // private int Kills; (survival)
     }
 
     public class Room
     {
-        //public int RoomId;
-        public int Online;
+        public int MapId = -1;
+        public int Online = 1;
         public string Password = string.Empty;
         public int Max = 4; // TODO: change to 3 if client is in survival (detect using 1u packet)
         public List<TcpClient> Players = new List<TcpClient>(4);

@@ -6,11 +6,12 @@ namespace NetworkObj.TCP
 {
     class Listener
     {
-        Clients clientHandler = new Clients();
-
-        public async Task Main(IPAddress IP, int Port)
+        public async Task Start(IPAddress IP, int Port)
         {
             TcpListener listener = new TcpListener(IP, Port);
+            listener.Start();
+
+            Console.WriteLine($"Server started at {IP}:{Port}");
 
             while (true)
             {
@@ -20,11 +21,20 @@ namespace NetworkObj.TCP
                 if (clientReq == ready)
                 {
                     TcpClient client = clientReq.Result;
-                    clientHandler.AddClient(client);
 
-                    if (clientHandler.GetUser(client) == null) client.Close();
+                    Console.WriteLine($"Client {client.Client.RemoteEndPoint} connected");
 
-                    
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await new Responder().Respond(client);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error with client {client.Client.RemoteEndPoint}: {ex.Message}");
+                        }
+                    });
                 }
             }
         }
