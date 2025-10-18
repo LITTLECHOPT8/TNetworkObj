@@ -236,6 +236,7 @@ class Responder
         p.m_room_index = (uint)room.Online;
         p.m_iUserId = (uint)user.UserId;
 
+        user.RoomId = (int)roomId;
         user.Index = room.Online;
         user.Name = name;
         user.Avatar = (int)avt;
