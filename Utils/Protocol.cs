@@ -8,6 +8,7 @@ public enum Protocols : uint
     GC_CREATE_ROOM = 4099u,
     CG_START_GAME = 8u,
     GC_START_GAME = 4104u,
+    GC_START_GAME_NOTIFY = 4360u,
     CG_ROOM_LIST = 2u,
     GC_ROOM_LIST = 4098u,
     CG_DESTROY_ROOM = 4u,

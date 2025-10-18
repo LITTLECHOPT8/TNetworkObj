@@ -72,6 +72,9 @@ class Responder
                 case Protocols.CG_JOIN_ROOM:
                     await JoinRoom();
                     break;
+                case Protocols.CG_USER_SPAWN:
+                    await PlayerSpawn();
+                    break;
                 default:
                     Logger.Error($"{Enum.GetName(typeof(Protocols), (Protocols)packetType)} unimplemented");
                     break;
@@ -106,6 +109,7 @@ class Responder
         host.Level = (int)days;
 
         int RoomId = Rooms.CreateRoom(client, password);
+        Rooms.GetRoom(RoomId).MapId = (int)mapId;
 
         host.RoomId = RoomId;
         p.m_iResult = 0u;
@@ -131,6 +135,9 @@ class Responder
 
         Logger.Info($"Room {host.RoomId} started");
 
+        Logger.Info($"MAP ID: {Rooms.GetRoom(host.RoomId)?.MapId}");
+
+        await Rooms.SendToRoom(host.RoomId, DefaultPacket(Protocols.GC_START_GAME_NOTIFY));
         await Rooms.SendToRoom(host.RoomId, DefaultPacket(Protocols.GC_START_GAME));
     }
 
@@ -237,14 +244,6 @@ class Responder
 
         room.Players.Add(client);
 
-        GJoinRoomNotify notify = new GJoinRoomNotify();
-
-        notify.m_room_index = (uint)user.Index;
-        notify.m_strNickname = user.Name;
-        notify.m_iLevel = (uint)user.Level;
-        notify.m_iAvatarType = (uint)user.Avatar;
-        notify.m_iUserId = (uint)user.UserId;
-
         room.Players.ForEach(async (TcpClient rando) => {
             if (!(client == rando))
             {
@@ -259,10 +258,41 @@ class Responder
             }
         });
 
+        GJoinRoomNotify notify = new GJoinRoomNotify();
+
+        notify.m_room_index = (uint)user.Index;
+        notify.m_strNickname = user.Name;
+        notify.m_iLevel = (uint)user.Level;
+        notify.m_iAvatarType = (uint)user.Avatar;
+        notify.m_iUserId = (uint)user.UserId;
+
         await Clients.SendToClient(client, p.Pack());
         await Rooms.SendToRoom((int)roomId, notify.Pack(), client);
 
         Logger.Info($"User {user.UserId} join Room {roomId}");
+    }
+
+    async Task PlayerSpawn()
+    {
+        ulong localTime = rpacket.rulong();
+        uint bpIndex = rpacket.ruint();
+        uint wp1 = rpacket.ruint();
+        uint wp2 = rpacket.ruint();
+        uint wp3 = rpacket.ruint();
+
+        User user = Clients.GetUser(client);
+
+        GPlayerSpawn p = new GPlayerSpawn();
+
+        p.m_lLocalTime = (long)localTime;
+        p.m_lServerTime = (long)localTime;
+        p.m_iUserId = (uint)user.UserId;
+        p.m_iBirthPointIndex = (uint)user.Index;
+        p.m_iWeaponIndex1 = wp1;
+        p.m_iWeaponIndex2 = wp2;
+        p.m_iWeaponIndex3 = wp3;
+
+        await Rooms.SendToRoom(user.RoomId, p.Pack(), client);
     }
 
     Writer DefaultPacket(Protocols packetType, bool result = false)

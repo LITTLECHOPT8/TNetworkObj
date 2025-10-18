@@ -18,11 +18,10 @@ public class GJoinRoomNotify : ServerPacket
         Writer p = new Writer();
         p.wuint(m_iUserId);
 
-        byte[] nick = new byte[16];
         byte[] unick = Encoding.ASCII.GetBytes(m_strNickname);
-        Array.Copy(unick, 0, nick, 0, (uint)Math.Min(16, unick.Length));
-        p.wuint((uint)Math.Min(16, unick.Length));
-        p.wbytes(nick);
+
+        p.wuint((uint)unick.Length);
+        p.wbytes(unick);
 
         p.wuint(m_iAvatarType);
         p.wuint(m_iLevel);

@@ -8,11 +8,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Packets\Client - Copy\**" />
-    <EmbeddedResource Remove="Packets\Client - Copy\**" />
-    <None Remove="Packets\Client - Copy\**" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="TCP\Listener.cs" />
     <Content Include="TCP\Clients.cs" />
     <Content Include="Classes\Stored.cs" />
