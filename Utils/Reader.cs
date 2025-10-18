@@ -12,6 +12,12 @@ namespace NetworkObj.Utils
         public int Position => position;
         public int Length => length;
 
+        public byte rb => rbyte();
+        public ushort r16 => rushort();
+        public uint r32 => ruint();
+        public ulong r64 => rulong();
+        public string rs => rstring();
+
         public Reader(byte[] source)
         {
             buffer = source ?? throw new ArgumentNullException(nameof(source));

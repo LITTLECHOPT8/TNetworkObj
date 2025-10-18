@@ -38,13 +38,15 @@ namespace NetworkObj.Utils
             if (value == null) value = string.Empty;
 
             byte[] stringBytes = Encoding.UTF8.GetBytes(value);
-            ushort length = (ushort)stringBytes.Length;
+            uint length = (uint)stringBytes.Length;
             Array.Resize(ref buffer, buffer.Length + stringBytes.Length);
 
             if (position + 2 + length > buffer.Length) return false;
 
-            if (!wuint(length)) return false;
-            return wbytes(stringBytes);
+            wuint(length);
+            wbytes(stringBytes);
+
+            return true;
         }
 
         public bool wushort(ushort value)

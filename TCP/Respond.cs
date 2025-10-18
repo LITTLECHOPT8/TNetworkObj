@@ -1,6 +1,8 @@
-using System.Net.Sockets;
 using NetworkObj.Packets;
 using NetworkObj.Utils;
+using System.ComponentModel.DataAnnotations;
+using System.Net.Sockets;
+using System.Reflection.Metadata;
 
 namespace NetworkObj.TCP;
 
@@ -56,12 +58,22 @@ class Responder
                     await CreateRoom();
                     break;
                 case Protocols.CG_START_GAME:
-                    await DefaultPacket(Protocols.GC_START_GAME);
+                    await StartRoom();
                     break;
                 case Protocols.CG_DESTROY_ROOM:
-                    await DefaultPacket(Protocols.GC_DESTROY_ROOM, true);
+                    await DestroyRoom();
+                    break;
+                case Protocols.CG_LEAVE_ROOM:
+                    await LeaveRoom();
+                    break;
+                case Protocols.CG_ROOM_INFO:
+                    await RoomInfo();
+                    break;
+                case Protocols.CG_JOIN_ROOM:
+                    await JoinRoom();
                     break;
                 default:
+                    Logger.Error($"{Enum.GetName(typeof(Protocols), (Protocols)packetType)} unimplemented");
                     break;
             }
         }
@@ -112,7 +124,148 @@ class Responder
         await Clients.SendToClient(client, p.Pack());
     }
 
-    async Task DefaultPacket(Protocols packetType, bool result = false)
+    async Task StartRoom()
+    {
+        User host = Clients.GetUser(client);
+        if (host.RoomId == -1 || !host.RoomMaster) return;
+
+        Logger.Info($"Room {host.RoomId} started");
+
+        await Rooms.SendToRoom(host.RoomId, DefaultPacket(Protocols.GC_START_GAME));
+    }
+
+    async Task DestroyRoom()
+    {
+        User host = Clients.GetUser(client);
+
+        if (host.RoomId == -1 || !host.RoomMaster) return;
+
+        Logger.Info($"Room {host.RoomId} destroyed");
+
+        await Rooms.SendToRoom(host.RoomId, DefaultPacket(Protocols.GC_DESTROY_ROOM, true));
+        await Rooms.DeleteRoom(host.RoomId);
+    }
+
+    async Task LeaveRoom()
+    {
+        User user = Clients.GetUser(client);
+        if (user.RoomId == -1) return;
+        if (user.RoomMaster) { await DestroyRoom(); return; }
+
+        GLeaveRoom notify = new GLeaveRoom();
+        notify.m_iUserId = (uint)user.UserId;
+
+        await Rooms.SendToRoom(user.RoomId, notify.Pack());
+        await Rooms.LeaveRoom(user.RoomId, client);
+        await Clients.SendToClient(client, DefaultPacket(Protocols.GC_LEAVE_ROOM, true));
+    }
+
+    async Task RoomInfo()
+    {
+        uint roomId = rpacket.ruint();
+
+        Room? room = Rooms.GetRoom((int)roomId);
+
+        if (room == null) return;
+
+        Logger.Log($"hi{(int)roomId}");
+
+        User creator = Clients.GetUser(room.Players[0]);
+
+        Logger.Log("hi1");
+
+        GRoomInfo p = new GRoomInfo();
+
+        Logger.Log("hi2");
+
+        p.m_iResult = 0u;
+        p.m_iMapId = (uint)room.MapId;
+        p.m_room_status = 0u;
+        p.m_password = room.Password;
+        p.m_strCreaterNickname = creator.Name;
+        p.m_Creater_level = (uint)creator.Level;
+        p.m_iOnlineNum = (uint)room.Online;
+        p.m_iMaxUserNum = (uint)room.Max;
+        p.m_iRoomId = roomId;
+
+        Logger.Log("hi3");
+
+        await Clients.SendToClient(client, p.Pack());
+    }
+
+    async Task JoinRoom()
+    {
+        uint roomId = rpacket.ruint();
+        ulong localTime = rpacket.rulong();
+        string name = rpacket.rstring();
+        uint avt = rpacket.ruint();
+        uint days = rpacket.ruint();
+
+        Logger.Log("JJJJ");
+
+        User user = Clients.GetUser(client);
+        Room? room = Rooms.GetRoom((int)roomId);
+
+        GJoinRoom p = new GJoinRoom();
+        if (room == null)
+        {
+            p.m_iResult = 2u;
+            p.m_iRoomId = 0u;
+        }
+        else if (room.Online == 4)
+        {
+            p.m_iResult = 1u;
+            p.m_iRoomId = 0u;
+        }
+        else
+        {
+            p.m_iResult = 0u;
+            p.m_iRoomId = roomId;
+        }
+
+        p.m_map_id = (uint)room.MapId;
+        p.m_lLocalTime = (long)localTime;
+        p.m_lServerTime = (long)localTime;
+        p.m_room_index = (uint)room.Online;
+        p.m_iUserId = (uint)user.UserId;
+
+        user.Index = room.Online;
+        user.Name = name;
+        user.Avatar = (int)avt;
+        user.Level = (int)days;
+        user.RoomMaster = false;
+
+        room.Players.Add(client);
+
+        GJoinRoomNotify notify = new GJoinRoomNotify();
+
+        notify.m_room_index = (uint)user.Index;
+        notify.m_strNickname = user.Name;
+        notify.m_iLevel = (uint)user.Level;
+        notify.m_iAvatarType = (uint)user.Avatar;
+        notify.m_iUserId = (uint)user.UserId;
+
+        room.Players.ForEach(async (TcpClient rando) => {
+            if (!(client == rando))
+            {
+                User ruser = Clients.GetUser(rando);
+                GJoinRoomNotify notify2 = new GJoinRoomNotify();
+                notify2.m_room_index = (uint)ruser.Index;
+                notify2.m_strNickname = ruser.Name;
+                notify2.m_iLevel = (uint)ruser.Level;
+                notify2.m_iAvatarType = (uint)ruser.Avatar;
+                notify2.m_iUserId = (uint)ruser.UserId;
+                await Clients.SendToClient(client, notify2.Pack());
+            }
+        });
+
+        await Clients.SendToClient(client, p.Pack());
+        await Rooms.SendToRoom((int)roomId, notify.Pack(), client);
+
+        Logger.Info($"User {user.UserId} join Room {roomId}");
+    }
+
+    Writer DefaultPacket(Protocols packetType, bool result = false)
     {
         Writer packet = new Writer();
 
@@ -122,13 +275,8 @@ class Responder
         packet.wuint((uint)packetType);
         packet.wuint(1u);
 
-        if (result) packet.wuint(1u);
+        if (result) packet.wuint(0u);
 
-        if (Clients.GetUser(client).RoomId == -1) return;
-
-        int roomId = Clients.GetUser(client).RoomId;
-        //Console.WriteLine(roomId);
-
-        await Rooms.SendToRoom(roomId, packet);
+        return packet;
     }
 }

@@ -31,6 +31,7 @@ namespace NetworkObj.TCP
             room.Online = 1;
             room.Max = 4;
             room.Password = Password;
+            user.Index = 0;
 
             rooms.Add(roomId, room);
 
@@ -40,9 +41,27 @@ namespace NetworkObj.TCP
             return roomId;
         }
 
+        public static async Task DeleteRoom(int roomId)
+        {
+            rooms.Remove(roomId);
+        }
+
+        public static async Task LeaveRoom(int roomId, TcpClient client)
+        {
+            if (!rooms.TryGetValue(roomId, out Room? room)) return;
+            room.Players.Remove(client);
+            Logger.Info($"User {Clients.GetUser(client).UserId} left Room {roomId}");
+        }
+
+        public static Room? GetRoom(int roomid)
+        {
+            if (!rooms.TryGetValue(roomid, out Room? room)) return null;
+            return room;
+        }
+
         public static async Task SendToRoom(int roomId, Writer packet, TcpClient? except = null)
         {
-            if (!rooms.TryGetValue(roomId, out Room room)) return;
+            if (!rooms.TryGetValue(roomId, out Room? room)) return;
 
             byte[] data = packet.array();
 
